@@ -173,9 +173,9 @@ void loop() {
   }
 
   // Read ps5 controller inputs
-  float vx = ps5.LStickY() / 128.0f;   // Forward/backward
-  float vy = ps5.LStickX() / 128.0f;   // Strafe left/right
-  float w  = ps5.RStickX() / 128.0f;   // Rotation
+  float vx = ps5.LStickY() / 128.0f;    // Forward/backward
+  float vy = -ps5.LStickX() / 128.0f;   // Strafe left/right (inverted)
+  float w  = ps5.RStickX() / 128.0f;    // Rotation
 
   // Apply deadzone
   if (abs(vx) < DEADZONE) vx = 0;

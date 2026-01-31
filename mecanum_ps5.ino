@@ -108,20 +108,8 @@ void mecanumDrive(float vx, float vy, float w, float maxSpeed) {
   }
 }
 
-// ================= SETUP =================
-void setup() {
-  Serial.begin(115200);
-  delay(100);
-
-  Serial.println("\n========================================");
-  Serial.println("  Mecanum Drive - PS5 Controller");
-  Serial.println("========================================\n");
-
-  // Initialize CAN
-  canInit();
-  delay(100);
-
-  // Enable motors sequentially (Phase 1 fix)
+// ================= ENABLE ALL MOTORS =================
+void enableAllMotors() {
   Serial.println("Enabling motors...");
 
   enableMotor(MOTOR_FL);
@@ -144,9 +132,23 @@ void setup() {
   delay(50);
   Serial.println("Motor RR (4): ✓");
 
-  Serial.println("\nMotors enabled!");
+  Serial.println("Motors enabled!\n");
+}
 
-  // Initialize PS5 controller
+// ================= SETUP =================
+void setup() {
+  Serial.begin(115200);
+  delay(100);
+
+  Serial.println("\n========================================");
+  Serial.println("  Mecanum Drive - PS5 Controller");
+  Serial.println("========================================\n");
+
+  // Initialize CAN
+  canInit();
+  delay(100);
+
+  // Initialize PS5 controller FIRST
   PS5.begin("ESP32-PS5");
   Serial.println("Waiting for PS5 controller...");
   Serial.println("Press PS button to connect\n");
@@ -154,11 +156,20 @@ void setup() {
 
 // ================= LOOP =================
 void loop() {
-  // Safety: stop if controller disconnected
+  // Wait for PS5 controller to connect
+  static bool motorsEnabled = false;
+
   if (!PS5.isConnected()) {
-    mecanumDrive(0, 0, 0, MAX_SPEED);
+    motorsEnabled = false;  // Reset flag when controller disconnects
     delay(100);
     return;
+  }
+
+  // Enable motors once when PS5 first connects
+  if (!motorsEnabled) {
+    Serial.println("\n✓ PS5 Controller connected!");
+    enableAllMotors();
+    motorsEnabled = true;
   }
 
   // Read PS5 controller inputs

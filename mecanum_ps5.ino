@@ -14,11 +14,11 @@
  */
 
 #include <driver/twai.h>
-#include <PS5Controller.h>
+#include <ps5Controller.h>
 #include "motor_config.h"
 
 // ================= PARAMETERS =================
-#define MAX_SPEED 6.0f        // rad/s - normal speed
+#define MAX_SPEED 10.0f       // rad/s - normal speed
 #define BOOST_MULTIPLIER 2.0f // Speed boost multiplier
 #define DEADZONE 0.05f        // Joystick deadzone
 
@@ -141,41 +141,41 @@ void setup() {
   delay(100);
 
   Serial.println("\n========================================");
-  Serial.println("  Mecanum Drive - PS5 Controller");
+  Serial.println("  Mecanum Drive - ps5 Controller");
   Serial.println("========================================\n");
 
   // Initialize CAN
   canInit();
   delay(100);
 
-  // Initialize PS5 controller FIRST
-  PS5.begin("ESP32-PS5");
-  Serial.println("Waiting for PS5 controller...");
+  // Initialize ps5 controller FIRST
+  ps5.begin("0c:27:56:30:02:bd");
+  Serial.println("Waiting for ps5 controller...");
   Serial.println("Press PS button to connect\n");
 }
 
 // ================= LOOP =================
 void loop() {
-  // Wait for PS5 controller to connect
+  // Wait for ps5 controller to connect
   static bool motorsEnabled = false;
 
-  if (!PS5.isConnected()) {
+  if (!ps5.isConnected()) {
     motorsEnabled = false;  // Reset flag when controller disconnects
     delay(100);
     return;
   }
 
-  // Enable motors once when PS5 first connects
+  // Enable motors once when ps5 first connects
   if (!motorsEnabled) {
-    Serial.println("\n✓ PS5 Controller connected!");
+    Serial.println("\n✓ ps5 Controller connected!");
     enableAllMotors();
     motorsEnabled = true;
   }
 
-  // Read PS5 controller inputs
-  float vx = PS5.LStickY() / 128.0f;   // Forward/backward
-  float vy = PS5.LStickX() / 128.0f;   // Strafe left/right
-  float w  = PS5.RStickX() / 128.0f;   // Rotation
+  // Read ps5 controller inputs
+  float vx = ps5.LStickY() / 128.0f;   // Forward/backward
+  float vy = ps5.LStickX() / 128.0f;   // Strafe left/right
+  float w  = ps5.RStickX() / 128.0f;   // Rotation
 
   // Apply deadzone
   if (abs(vx) < DEADZONE) vx = 0;
@@ -184,7 +184,7 @@ void loop() {
 
   // Check for speed boost (R2 button)
   float currentMaxSpeed = MAX_SPEED;
-  if (PS5.R2()) {
+  if (ps5.R2()) {
     currentMaxSpeed = MAX_SPEED * BOOST_MULTIPLIER;
   }
 
